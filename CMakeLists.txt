@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(barkeshli_s22)
 
-# GoogleTest requires at least C++11
-set(CMAKE_CXX_STANDARD 11)
-
 #. . . . . . . . . . . . . . . . . . . .
 include(GNUInstallDirs)
 if(MSVC)
@@ -42,6 +39,8 @@ FetchContent_MakeAvailable(googletest)
 
 
  
+# GoogleTest requires at least C++11
+set(CMAKE_CXX_STANDARD 11)
 enable_testing() 
 
 
