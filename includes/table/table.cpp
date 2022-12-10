@@ -127,7 +127,7 @@ Table Table::select(const vector<string> fields) {
 }
 
 Table Table::select(const vector<string> fields, vector<string> conditions) {
-    cout << "Select conditions infix: " << conditions << endl;
+    // cout << "Select conditions infix: " << conditions << endl;
     Queue<Token*> q;
     Stack<Token*> stk;
     for (auto condition : conditions) {
@@ -189,13 +189,13 @@ Table Table::select(const vector<string> fields, vector<string> conditions) {
         if (ptr->token_str() != "(")
             q.push(ptr);
     }
-    Queue<Token*> q2 = q;
-    cout << "Postfix: ";
-    while (!q2.empty()) {
-        cout << q2.front()->token_str() << ", ";
-        q2.pop();
-    }
-    cout << endl;
+    // Queue<Token*> q2 = q;
+    // cout << "Postfix: ";
+    // while (!q2.empty()) {
+    //     cout << q2.front()->token_str() << ", ";
+    //     q2.pop();
+    // }
+    // cout << endl;
     return select(fields, q);
 }
 
