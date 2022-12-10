@@ -139,7 +139,12 @@ Table Table::select(const vector<string> fields, vector<string> conditions) {
             while (!stk.empty()) {
                 Token* ptr = stk.top();
                 stk.pop();
+                if (!ptr) {
+                    // cout << "Found !ptr" << endl;
+                    break;
+                }
                 if (!ptr || ptr->token_str() == "(") {
+                    // cout << "Found (" << endl;
                     break;
                 }
                 q.push(ptr);
@@ -148,21 +153,29 @@ Table Table::select(const vector<string> fields, vector<string> conditions) {
             Relational* r = new Relational(condition);
             stk.push(r);
         } else if (condition == "and") {
-            Token* ptr = stk.top();
             Logical* l = new Logical(condition);
-            if (ptr && ptr->type_string() == "Relational") {
-                Token* ptr = stk.top();
+            Token* ptr;
+            while (true) {
+                ptr = stk.top();
+                if (!ptr || ptr->type_string() != "Relational" && ptr->token_str() != "and") {
+                    break;
+                }
                 stk.pop();
                 q.push(ptr);
+                
             }
             stk.push(l);
         } else if (condition == "or") {
-            Token* ptr = stk.top();
             Logical* l = new Logical(condition);
-            if (ptr && ptr->type_string() == "Relational" || ptr->token_str() == "and") {
-                Token* ptr = stk.top();
+            Token* ptr;
+            while (true) {
+                ptr = stk.top();
+                if (!ptr || ptr->type_string() != "Relational" && ptr->type_string() != "Logical") {
+                    break;
+                }
                 stk.pop();
                 q.push(ptr);
+                
             }
             stk.push(l);
         } else {

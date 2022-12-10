@@ -20,7 +20,7 @@ bool test_stub(bool debug = false)
   cmd = "insert into student values \"Sammuel L.\", Jackson, 	CS, 		40";
   sql.command(cmd);
 
-  cmd = "select * from student where (lname = Yang or major = CS) and ((age < 23 or lname = Jackson)";
+  cmd = "select * from student where lname = Yang or major = CS and age < 23 or lname = Jackson";
   sql.command(cmd);
 
   return true;
