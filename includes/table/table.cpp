@@ -88,11 +88,11 @@ void Table::insert_without_io(vector<string> row) {
 
 void Table::insert_into(vector<string> row) {
     if (f.is_open()) {
-        cout << "File is already open -- closing it" << endl;
+        // cout << "File is already open -- closing it" << endl;
         f.close();
     }
     string s = string(table_name+".tbl");
-    cout << "Inserting " << row << " into " << s << endl;
+    // cout << "Inserting " << row << " into " << s << endl;
     open_fileRW(f, s.c_str());
     empty = false;
     record = FileRecord(row);
@@ -170,7 +170,7 @@ Table Table::select(const vector<string> fields, vector<string> conditions) {
 }
 
 Table Table::select(const vector<string> fields, Queue<Token*> conditions) {
-    cout << "Selecing with token queue and with fields: " << fields << endl;
+    // cout << "Selecing with token queue and with fields: " << fields << endl;
     string fieldValue, fieldName, operation;
     Stack<Token*> stk;
     RecordSet* set1;
@@ -251,7 +251,7 @@ Table Table::make_table(const vector<string> fields, vector<int> record_numbers)
 }
 
 vector<int> Table::select_recs(string fieldName, string operation, string fieldValue) {
-    cout << "Select " << fieldName << " " << operation << " " << fieldValue << endl;
+    // cout << "Select " << fieldName << " " << operation << " " << fieldValue << endl;
     if (find(field_names.begin(), field_names.end(), fieldName) == field_names.end()) {
         return vector<int>();
     }

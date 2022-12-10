@@ -43,16 +43,13 @@ private:
     Table insert() {
         vector<string> values = pMap["values"];
         Table table = Table(name);
-        // cout << "Pre-Table: " << table << endl;
         table.insert_into(values);
-        // cout << "Values: " << values << endl;
-        // cout << "Post-Table: " << table << endl;
         return table;
     }
 
     Table select() {
         vector<string> fields = pMap["fields"];
-        cout << "Selecting fields: " << fields << endl;
+        // cout << "Selecting fields: " << fields << endl;
         vector<string> conditions = pMap["condition"];
         Table table = Table(name);
         if (fields.size() == 1 && fields[0] == "*") {
@@ -62,12 +59,12 @@ private:
         if (!pMap.contains("where")) {
             // cout << "There is no condition" << endl;
             Table t = table.select(fields);
-            cout << "Selection Table: " << t << endl;
+            // cout << "Selection Table: " << t << endl;
             last_recnos = table.select_recnos();
             return t;
         }
         Table t = table.select(fields, conditions);
-        cout << "Selection Table: " << t << endl;
+        // cout << "Selection Table: " << t << endl;
         last_recnos = table.select_recnos();
         return t;
     }
