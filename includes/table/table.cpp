@@ -127,6 +127,7 @@ Table Table::select(const vector<string> fields) {
 }
 
 Table Table::select(const vector<string> fields, vector<string> conditions) {
+    cout << "Select conditions infix: " << conditions << endl;
     Queue<Token*> q;
     Stack<Token*> stk;
     for (auto condition : conditions) {
@@ -135,15 +136,14 @@ Table Table::select(const vector<string> fields, vector<string> conditions) {
             stk.push(new Token(condition, 5));
         } else if (condition == ")") {
             // cout << stk << endl;
-            Token* ptr = stk.top();
-            stk.pop();
-            while (ptr && ptr->token_str() != "(") {
-                // cout << "pushing ptr: " << ptr << endl;
-                q.push(ptr);
-                ptr = stk.top();
+            while (!stk.empty()) {
+                Token* ptr = stk.top();
                 stk.pop();
+                if (!ptr || ptr->token_str() == "(") {
+                    break;
+                }
+                q.push(ptr);
             }
-            // cout << stk << endl;
         } else if (condition.find(">") != string::npos || condition.find("<") != string::npos || condition.find("=") != string::npos) {
             Relational* r = new Relational(condition);
             stk.push(r);
@@ -173,8 +173,16 @@ Table Table::select(const vector<string> fields, vector<string> conditions) {
     while (!stk.empty()) {
         Token* ptr = stk.top();
         stk.pop();
-        q.push(ptr);
+        if (ptr->token_str() != "(")
+            q.push(ptr);
     }
+    Queue<Token*> q2 = q;
+    cout << "Postfix: ";
+    while (!q2.empty()) {
+        cout << q2.front()->token_str() << ", ";
+        q2.pop();
+    }
+    cout << endl;
     return select(fields, q);
 }
 
