@@ -70,6 +70,7 @@ public:
         return mmap.get(MPair<K, V>(key)).value_list;
     }
     const vector<V>& at(const K& key) const {
+        // cout << "MMap get with key: " << key << endl;
         return mmap.get(MPair<K, V>(key)).value_list;
     }
 

@@ -33,9 +33,17 @@ Table::Table(const string name, const vector<string> names, bool special) {
     // open_fileW(f, s.c_str());
 }
 
-Table::Table(const Table& copyTable) {
-    // cout << "Copy Table CTOR called" << endl;
-    copy_table(copyTable.table_name);
+Table::Table(const Table& RHS) {
+    table_name = RHS.table_name;
+        field_names = RHS.field_names;
+        records = {};
+        for (auto item : RHS.records) {
+            vector<string> vec;
+            for (Pair<string, string> p : item) {
+                vec.push_back(p.value);
+            }
+            insert_without_io(vec);
+        }
 }
 
 void Table::copy_table(string name) {
@@ -256,7 +264,7 @@ vector<int> Table::select_recs(string fieldName, string operation, string fieldV
         return vector<int>();
     }
     MMap<string, int> order = field_orders[fieldName];
-    vector<int> recordNumbers;
+    vector<int> recordNumbers = vector<int>();
     MMap<string, int>::Iterator it;
     if (operation == "=") {
         auto val = order.at(fieldValue);

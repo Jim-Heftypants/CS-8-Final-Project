@@ -21,10 +21,18 @@ public:
     Table(const string name);
     Table(const string name, const vector<string> names);
     Table(const string name, const vector<string> names, bool special);
-    Table(const Table& copyTable);
+    Table(const Table& RHS);
     Table& operator=(const Table &RHS) {
-        // cout << "= operator called" << endl;
-        copy_table(RHS.table_name);
+        table_name = RHS.table_name;
+        field_names = RHS.field_names;
+        records = {};
+        for (auto item : RHS.records) {
+            vector<string> vec;
+            for (Pair<string, string> p : item) {
+                vec.push_back(p.value);
+            }
+            insert_without_io(vec);
+        }
         return *this;
     }
     void copy_table(string name);

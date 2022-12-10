@@ -1,13 +1,14 @@
 #include "gtest/gtest.h"
 #include <iostream>
 #include <iomanip>
+
+#include "../../includes/sql/sql.h"
+
 using namespace std;
 
 bool test_stub(bool debug = false)
 {
-  if (debug){
-    cout << "testB:: test-sub() entering test_sub" << endl;
-  }
+  SQL sql("_!sample.txt");
   return true;
 }
 

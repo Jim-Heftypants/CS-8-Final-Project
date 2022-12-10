@@ -178,16 +178,22 @@ public:
         return get_existing(entry);
     }
     const T& get(const T& entry)const {   //return a reference to entry
+        // cout << "const get called with key: " << entry << endl;
         auto i = first_ge(data, data_count, entry);
         bool found = i<data_count && data[i] == entry;
+        // if (i == 0 && !is_leaf()) cout << *this << endl;
         if (found && is_leaf()) {
+            // cout << "found element" << data[i] << endl;
             return data[i];
         } else if (!found && is_leaf()) {
-            return T();
+            // cout << "Element could not be found" << endl;
+            return entry;
         } else if (found) {
-            return subset[i+1]->get_existing(entry);
+            // cout << "Found ele in inner tree" << endl;
+            return subset[i+1]->get(entry);
         } else {
-            return subset[i]->get_existing(entry);
+            // cout << "ele not found. searching " << i << " subtree of " << endl << *subset[i] << endl;
+            return subset[i]->get(entry);
         }
     }
     T& get_existing(const T& entry) {     //return a reference to entry

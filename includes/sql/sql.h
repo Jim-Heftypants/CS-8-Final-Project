@@ -8,6 +8,9 @@ using namespace std;
 class SQL {
 public:
     SQL() {}
+    SQL(string filename) {
+        parse_batch_file(filename);
+    }
 
     Table command(string s) { // get a SQL command and run it
         int n = s.length();
@@ -32,10 +35,33 @@ public:
         return last_recnos;
     }
 
-    // function to read batch file (each line is one command)
+    void parse_batch_file(string filename) {
+        ifstream f;
+        f.open(filename);
+        string line;
+        while (getline(f, line)) {
+            cout << line << endl;
+            if (!is_comment_str(line)) {
+                Table t = command(line);
+                cout << t << endl;
+            }
+        }
+    }
+
     // function to read terminal with cin get_line
 
 private:
+    bool is_comment_str(string s) {
+        if (s.length() > 1 && s[0] == '/' && s[1] == '/') {
+            return true;
+        }
+        int i = 0;
+        while (i < s.length()) {
+            if (s[i] != ' ') return false;
+        }
+        return true;
+    }
+
     Table make() {
         return Table(name, pMap["fields"]);
     }
@@ -61,11 +87,13 @@ private:
             Table t = table.select(fields);
             // cout << "Selection Table: " << t << endl;
             last_recnos = table.select_recnos();
+            cout << "Recnos selected: " << last_recnos << endl;
             return t;
         }
         Table t = table.select(fields, conditions);
         // cout << "Selection Table: " << t << endl;
         last_recnos = table.select_recnos();
+        cout << "Recnos selected: " << last_recnos << endl;
         return t;
     }
 
