@@ -99,7 +99,6 @@ void STokenizer::make_table() {
     for (auto c : SUB_OPERATORS) _table[10][c] = 10;
 
     for (auto c : SPACES) _table[0][c] = 4;
-    for (auto c : SPACES) _table[4][c] = 4;
 
     for (auto c : PUNC) _table[0][c] = 5;
 

@@ -58,6 +58,9 @@ bool sql_basic(bool debug = false)
           cout << ">" << command_list[i] << endl;
           sql.command(command_list[i]);
      }
+     cout << endl << endl;
+     cout << Table("employee") << endl;
+     cout << Table("student") << endl;
 
      cout << endl
           << endl;

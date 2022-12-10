@@ -19,7 +19,8 @@ public:
         table_name = vector<string>();
         fields = vector<string>();
         values = vector<string>();
-        conditions = vector<string>();
+        condition = vector<string>();
+        where = vector<string>();
         // cout << "tVec set as: " << tVec << endl;
     }
 
@@ -49,8 +50,6 @@ private:
             for (int i = 4; i < tVec.size(); ++i) {
                 fields.push_back(tVec[i].token_str());
             }
-        } else if (s == "as") {
-            // select statement from another table
         } else {
             cout << "invalid tVec in make()" << endl;
         }
@@ -78,12 +77,13 @@ private:
         for (i; i < tVec.size(); ++i) {
             if (tVec[i].token_str() == "where") {
                 ++i;
+                where.push_back("yes");
                 break;
             }
             table_name.push_back(tVec[i].token_str());
         }
         for (i; i < tVec.size(); ++i) {
-            conditions.push_back(tVec[i].token_str());
+            condition.push_back(tVec[i].token_str());
         }
         return make_multimap();
     }
@@ -102,12 +102,12 @@ private:
         for (auto item : values) {
             multi.insert("values", item);
         }
-        for (auto item : conditions) {
-            multi.insert("conditions", item);
+        for (auto item : condition) {
+            multi.insert("condition", item);
         }
-
-        // multi.insert("where", "");
-        // if (fields.size() == 0) multi.insert("fields", "");
+        for (auto item : where) {
+            multi.insert("where", item);
+        }
 
         // cout << "Multimap: " << endl << multi << endl;
         return multi;
@@ -131,7 +131,7 @@ private:
     STokenizer st;
     vector<Token> tVec;
 
-    vector<string> command, table_name, fields, values, conditions;
+    vector<string> command, table_name, fields, values, condition, where;
 };
 
 #endif

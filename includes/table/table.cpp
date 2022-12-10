@@ -2,14 +2,44 @@
 
 int Table::serial_number = 0;
 
-bool contains(vector<int> vec, int item) {
-    for (auto i : vec) {
-        if (i == item) return true;
-    }
-    return false;
+Table::Table(const string name) {
+    copy_table(name);
+}
+Table::Table(const string name, const vector<string> names) {
+    ++Table::serial_number;
+    id = Table::serial_number;
+    table_name = name;
+    set_fields(names);
+    string s = string(table_name + "_fields.txt");
+    open_fileW(f, s.c_str());
+    record = FileRecord(names);
+    record.write(f);
+    f.close();
+    open_fileW(f, string(name+".tbl").c_str());
+    f.close();
 }
 
-Table::Table(const string name) {
+Table::Table(const string name, const vector<string> names, bool special) {
+    ++Table::serial_number;
+    id = Table::serial_number;
+    table_name = name;
+    set_fields(names);
+    string s = string(table_name+"_fields"+to_string(id)+".txt");
+    open_fileRW(f, s.c_str());
+    record = FileRecord(names);
+    record.write(f);
+    f.close();
+    // s = string(name+to_string(id)+".tbl").c_str();
+    // open_fileW(f, s.c_str());
+}
+
+Table::Table(const Table& copyTable) {
+    // cout << "Copy Table CTOR called" << endl;
+    copy_table(copyTable.table_name);
+}
+
+void Table::copy_table(string name) {
+    // cout << "Copying table with name: " << name << endl;
     // need to set up table copying data from tbl file
     ++Table::serial_number;
     id = Table::serial_number;
@@ -25,53 +55,23 @@ Table::Table(const string name) {
     open_fileRW(f, s.c_str());
     int i = 0;
     long bytes = record.read(f, i);
+    if (bytes == 0) {
+        // cout << "Nothing in file to read" << endl;
+        return;
+    }
     while (bytes>0){
         vector<string> rec = record.get_record();
+        // cout << "inseting rec: " << rec << endl;
         insert_without_io(rec);
         i++;
         bytes = record.read(f, i);
     }
-    vector<string> rec = record.get_record();
-    insert_without_io(rec);
-}
-Table::Table(const string name, const vector<string> names) {
-    ++Table::serial_number;
-    id = Table::serial_number;
-    table_name = name;
-    set_fields(names);
-    string s = string(name + "_fields.txt");
-    open_fileW(f, s.c_str());
-    record = FileRecord(names);
-    record.write(f);
+    // vector<string> rec = record.get_record();
+    // if (rec.size() > 0) {
+    //     cout << "inseting rec into copy: " << rec << endl;
+    //     insert_without_io(rec);
+    // }
     f.close();
-    open_fileW(f, string(name+".tbl").c_str());
-}
-
-Table::Table(const string name, const vector<string> names, bool special) {
-    ++Table::serial_number;
-    id = Table::serial_number;
-    table_name = name;
-    set_fields(names);
-    string s = string(name+"_fields"+to_string(id)+".txt");
-    open_fileW(f, s.c_str());
-    record = FileRecord(names);
-    record.write(f);
-    f.close();
-    s = string(name+to_string(id)+".tbl").c_str();
-    open_fileW(f, s.c_str());
-}
-
-Table::Table(const Table& copyTable) {
-    ++Table::serial_number;
-    id = Table::serial_number;
-    field_names = copyTable.field_names;
-    for (Map<string, string> map : copyTable.records) {
-        vector<string> row;
-        for (auto field : field_names) {
-            row.push_back(field);
-        }
-        insert_without_io(row);
-    }
 }
 
 void Table::insert_without_io(vector<string> row) {
@@ -87,20 +87,18 @@ void Table::insert_without_io(vector<string> row) {
 }
 
 void Table::insert_into(vector<string> row) {
+    if (f.is_open()) {
+        cout << "File is already open -- closing it" << endl;
+        f.close();
+    }
+    string s = string(table_name+".tbl");
+    cout << "Inserting " << row << " into " << s << endl;
+    open_fileRW(f, s.c_str());
     empty = false;
     record = FileRecord(row);
     record.write(f);
-    // ++last_record_num;
-    Map<string, string> m;
-    for (int i = 0; i < row.size(); ++i) {
-        m.insert(field_names[i], row[i]);
-    }
-    records.push_back(m);
-    for (int i = 0; i < field_names.size(); ++i) {
-        field_orders[field_names[i]].insert(m[field_names[i]], records.size()-1);
-    }
-
-    // reindex();
+    f.close();
+    insert_without_io(row);
 }
 Table Table::select_all() {
     Table newTable = Table(*this);
@@ -111,23 +109,17 @@ Table Table::select(const vector<string> fields, string fieldName, string operat
     return make_table(fields, recordNumbers);
 }
 
+Table Table::select(const vector<string> fields) {
+    vector<int> vec;
+    for (int i = 0; i < records.size(); ++i) {
+        vec.push_back(i);
+    }
+    return make_table(fields, vec);
+}
+
 Table Table::select(const vector<string> fields, vector<string> conditions) {
     Queue<Token*> q;
     Stack<Token*> stk;
-    // making postfix expression
-    /*
-        if number, add to queue
-        if operator
-            if operator > top of stack, push to stack
-            if operator < top of stack, pop top of stack and move into queue and push operator into stack
-        if left ( -> push to stack
-            ( ignores comparisons with pushing
-        if right )
-            pop all stack elements and push into queue until you see ( and then throw away ()
-        at the end, pop all from stack and add to queue
-
-        // logical is smaller than comparator
-    */
     for (auto condition : conditions) {
         // cout << "condition: " << condition << endl;
         if (condition == "(") {
@@ -146,10 +138,19 @@ Table Table::select(const vector<string> fields, vector<string> conditions) {
         } else if (condition.find(">") != string::npos || condition.find("<") != string::npos || condition.find("=") != string::npos) {
             Relational* r = new Relational(condition);
             stk.push(r);
-        } else if (condition == "or" || condition == "and") {
+        } else if (condition == "and") {
             Token* ptr = stk.top();
             Logical* l = new Logical(condition);
             if (ptr && ptr->type_string() == "Relational") {
+                Token* ptr = stk.top();
+                stk.pop();
+                q.push(ptr);
+            }
+            stk.push(l);
+        } else if (condition == "or") {
+            Token* ptr = stk.top();
+            Logical* l = new Logical(condition);
+            if (ptr && ptr->type_string() == "Relational" || ptr->token_str() == "and") {
                 Token* ptr = stk.top();
                 stk.pop();
                 q.push(ptr);
@@ -232,11 +233,11 @@ Table Table::select(const vector<string> fields, Queue<Token*> conditions) {
     for (auto item : set) {
         finalRecs.push_back(item);
     }
-    last_recnos = finalRecs;
     return make_table(fields, finalRecs);
 }
 
 Table Table::make_table(const vector<string> fields, vector<int> record_numbers) {
+    last_recnos = record_numbers;
     Table newTable = Table(table_name, fields, true);
     for (auto index : record_numbers) {
         auto record = records[index];
@@ -251,6 +252,9 @@ Table Table::make_table(const vector<string> fields, vector<int> record_numbers)
 
 vector<int> Table::select_recs(string fieldName, string operation, string fieldValue) {
     cout << "Select " << fieldName << " " << operation << " " << fieldValue << endl;
+    if (find(field_names.begin(), field_names.end(), fieldName) == field_names.end()) {
+        return vector<int>();
+    }
     MMap<string, int> order = field_orders[fieldName];
     vector<int> recordNumbers;
     MMap<string, int>::Iterator it;
@@ -294,7 +298,6 @@ vector<int> Table::select_recs(string fieldName, string operation, string fieldV
             }
         }
     }
-    last_recnos = recordNumbers;
     return recordNumbers;
 }
 

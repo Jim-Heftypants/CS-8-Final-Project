@@ -17,11 +17,17 @@ using namespace std;
 
 class Table {
 public:
-    Table() {}
+    Table() {};
     Table(const string name);
     Table(const string name, const vector<string> names);
     Table(const string name, const vector<string> names, bool special);
     Table(const Table& copyTable);
+    Table& operator=(const Table &RHS) {
+        // cout << "= operator called" << endl;
+        copy_table(RHS.table_name);
+        return *this;
+    }
+    void copy_table(string name);
     ~Table() {};
 
     void insert_without_io(vector<string> row);
@@ -30,6 +36,7 @@ public:
     Table select(const vector<string> fields, string fieldName, string operation, string fieldValue);
     Table select(const vector<string> fields, vector<string> conditions);
     Table select(const vector<string> fields, Queue<Token*> conditions);
+    Table select(const vector<string> fields);
     vector<int> select_recs(string fieldName, string operation, string fieldValue);
     vector<long> select_recnos() {
         vector<long> newVec;
@@ -48,20 +55,33 @@ public:
 
     friend ostream& operator<<(ostream& outs, const Table& print_me){
         outs << "Table:" << endl;
-        outs << "ID" << "\t";
+        outs << "ID" << "\t" << "\t";
         for (auto field : print_me.field_names) {
-            outs << field << "\t";
+            outs << field << "\t" << "\t";
         }
         outs << endl;
         for (int i = 0; i < print_me.records.size(); ++i) {
-            cout << i << "\t";
+            cout << i << "\t" << "\t";
             for (auto field : print_me.field_names) {
-                outs << print_me.records[i].at(field) << "\t";
+                outs << print_me.records[i].at(field) << "\t" << "\t";
             }
             outs << endl;
         }
         // outs << endl << print_me.field_orders.at("age") << endl;
         return outs;
+    }
+
+    void read_file() {
+        cout << "File" << endl;
+        int i = 0;
+        long bytes = record.read(f, i);
+        cout << "bytes" << bytes << endl;
+        while (bytes>0){
+            cout << record << endl;
+            i++;
+            bytes = record.read(f, i);
+        }
+        cout << endl;
     }
 
 private:

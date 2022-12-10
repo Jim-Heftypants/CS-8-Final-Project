@@ -86,7 +86,7 @@ public:
 
 //  Operations:
     bool contains(const K& key) const {
-        return mmap.contains(key);
+        return mmap.contains(MPair<K, V>(key));
     }
     vector<V> &get(const K& key) {
         return mmap.get(MPair<K, V>(key)).value_list;
