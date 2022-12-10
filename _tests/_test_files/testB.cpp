@@ -8,7 +8,7 @@ using namespace std;
 
 bool test_stub(bool debug = false)
 {
-  SQL sql("_!sample.txt");
+  SQL sql("_!select.txt");
   return true;
 }
 

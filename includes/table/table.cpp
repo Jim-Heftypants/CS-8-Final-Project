@@ -34,16 +34,17 @@ Table::Table(const string name, const vector<string> names, bool special) {
 }
 
 Table::Table(const Table& RHS) {
+    // cout << "copy CTOR called" << endl;
     table_name = RHS.table_name;
-        field_names = RHS.field_names;
-        records = {};
-        for (auto item : RHS.records) {
-            vector<string> vec;
-            for (Pair<string, string> p : item) {
-                vec.push_back(p.value);
-            }
-            insert_without_io(vec);
+    field_names = RHS.field_names;
+    records = {};
+    for (auto item : RHS.records) {
+        vector<string> vec;
+        for (auto field : field_names) {
+            vec.push_back(item.at(field));
         }
+        insert_without_io(vec);
+    }
 }
 
 void Table::copy_table(string name) {
@@ -248,13 +249,16 @@ Table Table::make_table(const vector<string> fields, vector<int> record_numbers)
     last_recnos = record_numbers;
     Table newTable = Table(table_name, fields, true);
     for (auto index : record_numbers) {
-        auto record = records[index];
+        Map<string, string> record = records[index];
         vector<string> valueSet;
         for (auto field : fields) {
+            // cout << "Pushing record " << record[field] << " into field " << field << ", ";
             valueSet.push_back(record[field]);
         }
+        // cout << endl;
         newTable.insert_without_io(valueSet);
     }
+    // cout << "new table: " << newTable << endl;
     return newTable;
 }
 
@@ -318,14 +322,4 @@ void Table::set_fields(vector<string> names) {
 }
 vector<string> Table::get_fields() {
     return field_names; // optionally read from the file of field names;
-}
-
-void Table::sortField(string fieldName) {
-    
-}
-
-void Table::reindex() {
-    for (string& field : field_names) {
-        sortField(field);
-    }
 }
